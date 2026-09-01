@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout — RAFT</title>
+<meta name="description" content="Secure checkout for RAFT — pay safely with PayFast.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="dashboard.html">My Orders</a>
+    </nav>
+    <div class="header-actions">
+      <a href="dashboard.html" class="icon-link" aria-label="Account"></a>
+      <a href="cart.html" class="icon-link" aria-label="Cart"><span class="cart-count" data-cart-count>0</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container" style="max-width:1100px;">
+    <div class="section-head"><h2>Checkout</h2></div>
+
+    <ul class="step-list">
+      <li class="active" id="step-tab-1"><span class="num">1</span>Shipping</li>
+      <li id="step-tab-2"><span class="num">2</span>Review</li>
+      <li id="step-tab-3"><span class="num">3</span>Payment</li>
+    </ul>
+
+    <div id="checkout-empty" style="display:none;" class="empty-state">
+      <h3>Your cart is empty</h3>
+      <p>Add something before checking out.</p>
+      <a href="shop.html" class="btn btn-primary">Browse the shop</a>
+    </div>
+
+    <div id="checkout-body" class="checkout-grid">
+      <div>
+        <!-- Step 1: Shipping -->
+        <div class="form-card" id="step-1">
+          <h3>Shipping details</h3>
+          <form id="shipping-form">
+            <div class="form-row">
+              <div class="field"><label for="fname">First name</label><input id="fname" required></div>
+              <div class="field"><label for="lname">Last name</label><input id="lname" required></div>
+            </div>
+            <div class="form-row">
+              <div class="field full"><label for="email">Email address</label><input id="email" type="email" required></div>
+            </div>
+            <div class="form-row">
+              <div class="field full"><label for="phone">Phone number</label><input id="phone" type="tel" required></div>
+            </div>
+            <div class="form-row">
+              <div class="field full"><label for="address">Street address</label><input id="address" required></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label for="city">City</label><input id="city" required></div>
+              <div class="field"><label for="postcode">Postal code</label><input id="postcode" required></div>
+            </div>
+            <div class="form-row">
+              <div class="field full">
+                <label for="province">Province</label>
+                <select id="province" required>
+                  <option value="">Select province</option>
+                  <option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option>
+                  <option>Eastern Cape</option><option>Free State</option><option>Limpopo</option>
+                  <option>Mpumalanga</option><option>North West</option><option>Northern Cape</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Continue to review</button>
+          </form>
+        </div>
+
+        <!-- Step 2: Review -->
+        <div class="form-card" id="step-2" style="display:none;">
+          <h3>Review your order</h3>
+          <div id="review-lines"></div>
+          <div id="review-address" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink-600);"></div>
+          <div style="display:flex;gap:12px;margin-top:18px;">
+            <button class="btn btn-outline" id="back-to-1">Back</button>
+            <button class="btn btn-primary" id="to-payment">Continue to payment</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment -->
+        <div class="form-card" id="step-3" style="display:none;">
+          <h3>Payment</h3>
+          <div class="payfast-note"></div>
+          <div style="margin-top:18px;display:flex;gap:12px;">
+            <button class="btn btn-outline" id="back-to-2">Back</button>
+            <button class="btn btn-primary" id="pay-btn">Pay with PayFast</button>
+          </div>
+          <p id="checkout-status" style="margin-top:14px;font-size:.85rem;"></p>
+        </div>
+      </div>
+
+      <aside class="cart-summary">
+        <h3>Order summary</h3>
+        <div id="summary-lines"></div>
+        <div class="summary-row"><span>Subtotal</span><span id="sum-subtotal"></span></div>
+        <div class="summary-row"><span>Shipping</span><span id="sum-shipping"></span></div>
+        <div class="summary-row total"><span>Total</span><span id="sum-total"></span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 RAFT Outdoor (Pty) Ltd. All rights reserved.</span>
+      <div class="payment-icons"><span>PayFast</span><span>Visa</span><span>Mastercard</span><span>EFT</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.querySelectorAll('.logo').forEach(l => l.innerHTML = raftIcon('logo') + '<span>RAFT</span>');
+document.querySelector('.nav-toggle').innerHTML = raftIcon('menu');
+document.querySelector('[aria-label="Account"]').innerHTML = raftIcon('user');
+document.querySelector('[aria-label="Cart"]').innerHTML = raftIcon('cart') + document.querySelector('[aria-label="Cart"]').innerHTML;
+document.querySelector('.payfast-note').innerHTML = raftIcon('lock') +
+  '<span>You\'ll be redirected to PayFast\'s secure payment page to complete your card, Instant EFT or account payment. RAFT never sees or stores your card details.</span>';
+
+const lines = raftCartLines();
+if(!lines.length){
+  document.getElementById('checkout-empty').style.display = 'block';
+  document.getElementById('checkout-body').style.display = 'none';
+}
+
+function renderSummary(){
+  const sub = raftCartSubtotal(), ship = raftShippingCost(), total = raftCartTotal();
+  document.getElementById('summary-lines').innerHTML = lines.map(l =>
+    `<div class="summary-row"><span>${l.product.name} × ${l.qty}</span><span>${raftFormatPrice(l.lineTotal)}</span></div>`
+  ).join('');
+  document.getElementById('sum-subtotal').textContent = raftFormatPrice(sub);
+  document.getElementById('sum-shipping').textContent = ship === 0 ? 'Free' : raftFormatPrice(ship);
+  document.getElementById('sum-total').textContent = raftFormatPrice(total);
+}
+renderSummary();
+
+let shipping = {};
+
+document.getElementById('shipping-form').addEventListener('submit', e => {
+  e.preventDefault();
+  shipping = {
+    firstName: fname.value, lastName: lname.value, email: email.value, phone: phone.value,
+    address: address.value, city: city.value, postcode: postcode.value, province: province.value
+  };
+  goStep(2);
+  document.getElementById('review-lines').innerHTML = lines.map(l =>
+    `<div class="summary-row"><span>${l.product.name} × ${l.qty}</span><span>${raftFormatPrice(l.lineTotal)}</span></div>`).join('');
+  document.getElementById('review-address').innerHTML =
+    `<strong>Deliver to:</strong> ${shipping.firstName} ${shipping.lastName}, ${shipping.address}, ${shipping.city}, ${shipping.province} ${shipping.postcode} · ${shipping.email}`;
+});
+document.getElementById('back-to-1').addEventListener('click', () => goStep(1));
+document.getElementById('to-payment').addEventListener('click', () => goStep(3));
+document.getElementById('back-to-2').addEventListener('click', () => goStep(2));
+
+function goStep(n){
+  [1,2,3].forEach(i => {
+    document.getElementById('step-'+i).style.display = i===n ? 'block' : 'none';
+    document.getElementById('step-tab-'+i).classList.toggle('active', i<=n);
+  });
+}
+
+document.getElementById('pay-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('pay-btn');
+  const status = document.getElementById('checkout-status');
+  btn.disabled = true; btn.textContent = 'Preparing secure payment…';
+  status.textContent = '';
+
+  const orderPayload = {
+    customer: shipping,
+    items: lines.map(l => ({ id: l.id, name: l.product.name, qty: l.qty, price: l.product.price })),
+    subtotal: raftCartSubtotal(), shipping: raftShippingCost(), total: raftCartTotal()
+  };
+
+  try{
+    // Real flow: backend creates the order, reserves stock, and returns the
+    // signed PayFast fields to redirect the browser to. See
+    // backend/routes/checkout.js for the actual PayFast signature logic.
+    const res = await fetch('/api/checkout', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(orderPayload)
+    });
+    if(!res.ok) throw new Error('backend unavailable');
+    const data = await res.json();
+    submitToPayFast(data.action, data.fields);
+  }catch(err){
+    // Demo fallback — no backend is connected in this preview, so we
+    // simulate a successful PayFast payment locally and record the order,
+    // purely so the checkout → dashboard flow can be clicked through.
+    status.innerHTML = `<span style="color:var(--orange-700);">Demo mode: no backend connected, simulating a successful PayFast payment…</span>`;
+    setTimeout(() => {
+      const order = {
+        id: 'RFT-' + Math.floor(100000 + Math.random()*900000),
+        date: new Date().toISOString(),
+        status: 'Paid',
+        items: orderPayload.items,
+        total: orderPayload.total,
+        customer: shipping
+      };
+      const orders = JSON.parse(localStorage.getItem('raft_orders_demo') || '[]');
+      orders.unshift(order);
+      localStorage.setItem('raft_orders_demo', JSON.stringify(orders));
+      localStorage.removeItem(RAFT_CART_KEY);
+      location.href = 'dashboard.html?justPaid=' + order.id;
+    }, 1100);
+  }
+});
+
+function submitToPayFast(action, fields){
+  const form = document.createElement('form');
+  form.method = 'POST'; form.action = action;
+  Object.entries(fields).forEach(([k,v]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = k; input.value = v;
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+</body>
+</html>

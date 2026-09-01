@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /dashboard.html
+
+Sitemap: https://www.raftgear.co.za/sitemap.xml

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Cart — RAFT</title>
+<meta name="description" content="Review your RAFT cart before checkout.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?cat=Rafts">Rafts</a>
+      <a href="shop.html?cat=Kayaks">Kayaks</a>
+      <a href="dashboard.html">My Orders</a>
+    </nav>
+    <div class="header-actions">
+      <a href="dashboard.html" class="icon-link" aria-label="Account"></a>
+      <a href="cart.html" class="icon-link" aria-label="Cart" aria-current="page"><span class="cart-count" data-cart-count>0</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>Your cart</h2></div>
+    <div id="cart-root"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 RAFT Outdoor (Pty) Ltd. All rights reserved.</span>
+      <div class="payment-icons"><span>PayFast</span><span>Visa</span><span>Mastercard</span><span>EFT</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.querySelectorAll('.logo').forEach(l => l.innerHTML = raftIcon('logo') + '<span>RAFT</span>');
+document.querySelector('.nav-toggle').innerHTML = raftIcon('menu');
+document.querySelector('[aria-label="Account"]').innerHTML = raftIcon('user');
+document.querySelector('[aria-label="Cart"]').innerHTML = raftIcon('cart') + document.querySelector('[aria-label="Cart"]').innerHTML;
+
+function renderCart(){
+  const lines = raftCartLines();
+  const root = document.getElementById('cart-root');
+  if(!lines.length){
+    root.innerHTML = `<div class="empty-state">
+      ${raftIcon('empty')}
+      <h3>Your cart is empty</h3>
+      <p>Add a raft, kayak or a bit of safety gear to get started.</p>
+      <a href="shop.html" class="btn btn-primary">Browse the shop</a>
+    </div>`;
+    return;
+  }
+  const sub = raftCartSubtotal(), ship = raftShippingCost(), total = raftCartTotal();
+  root.innerHTML = `
+    <div class="checkout-grid">
+      <div>
+        <table class="cart-table">
+          <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead>
+          <tbody>
+            ${lines.map(l => `
+              <tr data-id="${l.id}">
+                <td>
+                  <div class="cart-item">
+                    <div class="thumb-sm">${raftIcon(l.product.icon)}</div>
+                    <div>
+                      <a href="product.html?id=${l.id}"><strong>${l.product.name}</strong></a>
+                      <div>
+                        <button class="remove-link" data-remove="${l.id}">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>${raftFormatPrice(l.product.price)}</td>
+                <td>
+                  <div class="qty-control">
+                    <button type="button" data-dec="${l.id}" aria-label="Decrease quantity">−</button>
+                    <input type="number" value="${l.qty}" min="1" max="${l.product.stock}" data-qty="${l.id}">
+                    <button type="button" data-inc="${l.id}" aria-label="Increase quantity">+</button>
+                  </div>
+                  ${l.qty >= l.product.stock ? `<div style="font-size:.72rem;color:var(--orange-700);margin-top:4px;">Max stock reached</div>` : ''}
+                </td>
+                <td><strong>${raftFormatPrice(l.lineTotal)}</strong></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <aside class="cart-summary">
+        <h3>Order summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>${raftFormatPrice(sub)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${ship === 0 ? 'Free' : raftFormatPrice(ship)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${raftFormatPrice(total)}</span></div>
+        <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:14px;">Proceed to checkout</a>
+        <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px;">Continue shopping</a>
+      </aside>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-remove]').forEach(btn => btn.addEventListener('click', () => {
+    raftRemoveFromCart(btn.dataset.remove); renderCart();
+  }));
+  root.querySelectorAll('[data-inc]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.inc; const line = raftCartLines().find(l=>l.id===id);
+    raftUpdateQty(id, line.qty + 1); renderCart();
+  }));
+  root.querySelectorAll('[data-dec]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.dec; const line = raftCartLines().find(l=>l.id===id);
+    if(line.qty <= 1){ raftRemoveFromCart(id); } else { raftUpdateQty(id, line.qty - 1); }
+    renderCart();
+  }));
+  root.querySelectorAll('[data-qty]').forEach(inp => inp.addEventListener('change', () => {
+    raftUpdateQty(inp.dataset.qty, Number(inp.value)); renderCart();
+  }));
+}
+renderCart();
+</script>
+</body>
+</html>

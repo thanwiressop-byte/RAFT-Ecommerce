@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Confirmed — RAFT</title>
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <div style="flex:1;"></div>
+  </div>
+</header>
+<section class="section">
+  <div class="container" style="max-width:560px;text-align:center;">
+    <div style="width:64px;height:64px;border-radius:50%;background:#E3F1DD;color:#3C7A2E;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg>
+    </div>
+    <h1>Thanks — your order is in.</h1>
+    <p id="order-line">We've received your PayFast payment and we're getting your order ready to ship.</p>
+    <p style="font-size:.85rem;">
+      Note: this page confirms your <em>redirect</em> from PayFast. The order is only marked
+      "Paid" on our side once PayFast's server-to-server notification (ITN) is verified —
+      that usually lands within a few seconds, sometimes up to a couple of minutes.
+    </p>
+    <a href="dashboard.html" class="btn btn-primary">View my order</a>
+    <a href="shop.html" class="btn btn-outline" style="margin-left:10px;">Continue shopping</a>
+  </div>
+</section>
+<script>
+  const orderId = new URLSearchParams(location.search).get('order');
+  if(orderId) document.getElementById('order-line').textContent = `Order ${orderId} is confirmed — we've received your PayFast payment and we're getting it ready to ship.`;
+</script>
+</body>
+</html>

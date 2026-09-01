@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Account — Order History — RAFT</title>
+<meta name="description" content="View your RAFT order history, track shipments, and manage your account details.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="dashboard.html" aria-current="page">My Orders</a>
+    </nav>
+    <div class="header-actions">
+      <a href="dashboard.html" class="icon-link" aria-label="Account"></a>
+      <a href="cart.html" class="icon-link" aria-label="Cart"><span class="cart-count" data-cart-count>0</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>My account</h2><p id="welcome-line">Welcome back, Jordan.</p></div>
+
+    <div id="paid-banner" style="display:none;" class="payfast-note" style="margin-bottom:24px;"></div>
+
+    <div class="dash-layout">
+      <nav class="dash-nav" aria-label="Account navigation">
+        <a href="#" class="active" data-tab="orders">Order history</a>
+        <a href="#" data-tab="profile">Profile details</a>
+        <a href="#" data-tab="addresses">Addresses</a>
+        <a href="shop.html">Continue shopping</a>
+      </nav>
+
+      <div>
+        <div class="summary-stats">
+          <div class="stat-box"><strong id="stat-orders">0</strong><span>Total orders</span></div>
+          <div class="stat-box"><strong id="stat-spend">R0</strong><span>Total spent</span></div>
+          <div class="stat-box"><strong id="stat-open">0</strong><span>In progress</span></div>
+        </div>
+
+        <div id="tab-orders" class="dash-card">
+          <h3 style="margin-bottom:16px;">Order history</h3>
+          <div id="orders-list"></div>
+        </div>
+
+        <div id="tab-profile" class="dash-card" style="display:none;">
+          <h3 style="margin-bottom:16px;">Profile details</h3>
+          <form class="profile-form">
+            <div class="form-row">
+              <div class="field"><label>First name</label><input value="Jordan"></div>
+              <div class="field"><label>Last name</label><input value="Naidoo"></div>
+            </div>
+            <div class="form-row">
+              <div class="field full"><label>Email address</label><input value="jordan.naidoo@example.com" type="email"></div>
+            </div>
+            <div class="form-row">
+              <div class="field full"><label>Phone number</label><input value="071 234 5678" type="tel"></div>
+            </div>
+            <button class="btn btn-primary" type="button" onclick="raftShowToast('Profile changes saved')">Save changes</button>
+          </form>
+        </div>
+
+        <div id="tab-addresses" class="dash-card" style="display:none;">
+          <h3 style="margin-bottom:16px;">Saved addresses</h3>
+          <div class="form-card" style="padding:16px;">
+            <strong>Home</strong>
+            <p style="margin:6px 0 0;">14 River Road, Newlands, Cape Town, Western Cape, 7700</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 RAFT Outdoor (Pty) Ltd. All rights reserved.</span>
+      <div class="payment-icons"><span>PayFast</span><span>Visa</span><span>Mastercard</span><span>EFT</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.querySelectorAll('.logo').forEach(l => l.innerHTML = raftIcon('logo') + '<span>RAFT</span>');
+document.querySelector('.nav-toggle').innerHTML = raftIcon('menu');
+document.querySelector('[aria-label="Account"]').innerHTML = raftIcon('user');
+document.querySelector('[aria-label="Cart"]').innerHTML = raftIcon('cart') + document.querySelector('[aria-label="Cart"]').innerHTML;
+
+/**
+ * Order history.
+ * Production: GET /api/orders (authenticated) returns this user's orders
+ * from the database — see backend/routes/orders.js. Seeded here with sample
+ * orders plus anything created via the demo checkout flow so the page has
+ * something real to show without a backend attached.
+ */
+const SAMPLE_ORDERS = [
+  { id:"RFT-482913", date:"2026-08-11", status:"Shipped", total:5248, items:[{name:"Drift 2-Person Touring Kayak", qty:1, price:6299}] },
+  { id:"RFT-479002", date:"2026-07-29", status:"Paid", total:1648, items:[{name:"Torrent CE-Rated Life Jacket", qty:2, price:749}] },
+  { id:"RFT-471120", date:"2026-06-14", status:"Cancelled", total:899, items:[{name:"Eddy Adjustable Paddle", qty:1, price:899}] },
+];
+
+const demoOrders = JSON.parse(localStorage.getItem('raft_orders_demo') || '[]');
+const allOrders = [...demoOrders, ...SAMPLE_ORDERS];
+
+const justPaid = new URLSearchParams(location.search).get('justPaid');
+if(justPaid){
+  const banner = document.getElementById('paid-banner');
+  banner.style.display = 'flex';
+  banner.innerHTML = raftIcon('shield') + `<span><strong>Payment received</strong> — order ${justPaid} is confirmed. A receipt has been emailed to you.</span>`;
+}
+
+document.getElementById('stat-orders').textContent = allOrders.length;
+document.getElementById('stat-spend').textContent = raftFormatPrice(allOrders.reduce((s,o)=>s+o.total,0));
+document.getElementById('stat-open').textContent = allOrders.filter(o => ['Paid','Pending','Shipped'].includes(o.status)).length;
+
+const statusClass = { Paid:'status-paid', Shipped:'status-shipped', Pending:'status-pending', Cancelled:'status-cancelled' };
+
+document.getElementById('orders-list').innerHTML = allOrders.length ? allOrders.map(o => `
+  <div class="order-row">
+    <div>
+      <div class="oid">${o.id}</div>
+      <div class="odate">${new Date(o.date).toLocaleDateString('en-ZA', {year:'numeric', month:'short', day:'numeric'})}</div>
+    </div>
+    <div>${o.items.map(i=>`${i.name} × ${i.qty}`).join(', ')}</div>
+    <div>${raftFormatPrice(o.total)}</div>
+    <div><span class="status-pill ${statusClass[o.status]||''}">${o.status}</span></div>
+    <div><button class="btn btn-outline" style="padding:8px 14px;font-size:.82rem;" onclick="raftShowToast('Opening invoice for ${o.id}')">View</button></div>
+  </div>
+`).join('') : `<p>No orders yet — <a href="shop.html">start shopping</a>.</p>`;
+
+document.querySelectorAll('.dash-nav a[data-tab]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.dash-nav a[data-tab]').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    ['orders','profile','addresses'].forEach(t => {
+      document.getElementById('tab-'+t).style.display = t === link.dataset.tab ? 'block' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

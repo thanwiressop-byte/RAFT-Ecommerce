@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop All River Gear | Rafts, Kayaks, Paddles & Safety Gear — RAFT</title>
+<meta name="description" content="Browse RAFT's full range of inflatable rafts, kayaks, paddles, life jackets and camping gear. Filter by category, price and availability — real-time stock on every listing.">
+<link rel="canonical" href="https://www.raftgear.co.za/shop.html">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="Shop All River Gear — RAFT">
+<meta property="og:description" content="Inflatable rafts, kayaks, paddles and safety gear, in stock and ready to ship SA-wide.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="shop.html" aria-current="page">Shop</a>
+      <a href="shop.html?cat=Rafts">Rafts</a>
+      <a href="shop.html?cat=Kayaks">Kayaks</a>
+      <a href="dashboard.html">My Orders</a>
+    </nav>
+    <div class="header-actions">
+      <a href="dashboard.html" class="icon-link" aria-label="Account"></a>
+      <a href="cart.html" class="icon-link" aria-label="Cart"><span class="cart-count" data-cart-count>0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="padding-top:24px;">
+  <p class="breadcrumb"><a href="index.html">Home</a> / <span id="crumb-current">Shop</span></p>
+</div>
+
+<section class="section" style="padding-top:8px;">
+  <div class="container shop-layout">
+    <aside class="filters" aria-label="Product filters">
+      <h4>Category</h4>
+      <div class="filter-group" id="cat-filters"></div>
+      <h4>Max price</h4>
+      <div class="filter-group">
+        <input type="range" id="price-range" min="500" max="9000" step="100" style="width:100%;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--ink-600);">
+          <span>R500</span><span id="price-val">R9 000</span>
+        </div>
+      </div>
+      <h4>Availability</h4>
+      <div class="filter-group">
+        <label><input type="checkbox" id="in-stock-only"> In stock only</label>
+      </div>
+      <button class="btn btn-outline btn-block" id="clear-filters">Clear filters</button>
+    </aside>
+
+    <div>
+      <div class="shop-toolbar">
+        <strong id="result-count">12 products</strong>
+        <select id="sort-select" aria-label="Sort products">
+          <option value="popular">Sort: Most popular</option>
+          <option value="price-asc">Price: Low to high</option>
+          <option value="price-desc">Price: High to low</option>
+          <option value="rating">Highest rated</option>
+        </select>
+      </div>
+      <div class="product-grid" id="shop-grid"></div>
+      <p id="no-results" style="display:none;text-align:center;padding:40px 0;color:var(--ink-600);">No products match those filters — try widening your search.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 RAFT Outdoor (Pty) Ltd. All rights reserved.</span>
+      <div class="payment-icons"><span>PayFast</span><span>Visa</span><span>Mastercard</span><span>EFT</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.querySelectorAll('.logo').forEach(l => l.innerHTML = raftIcon('logo') + '<span>RAFT</span>');
+document.querySelector('.nav-toggle').innerHTML = raftIcon('menu');
+document.querySelector('[aria-label="Account"]').innerHTML = raftIcon('user');
+document.querySelector('[aria-label="Cart"]').innerHTML = raftIcon('cart') + document.querySelector('[aria-label="Cart"]').innerHTML;
+
+const params = new URLSearchParams(location.search);
+let state = {
+  cat: params.get('cat') || 'All',
+  maxPrice: 9000,
+  inStockOnly: false,
+  sort: 'popular'
+};
+
+// Category filter chips
+document.getElementById('cat-filters').innerHTML = ['All', ...RAFT_CATEGORIES].map(c =>
+  `<label><input type="radio" name="cat" value="${c}" ${state.cat===c?'checked':''}> ${c}</label>`
+).join('');
+document.getElementById('crumb-current').textContent = state.cat === 'All' ? 'Shop' : state.cat;
+
+document.getElementById('cat-filters').addEventListener('change', e => {
+  state.cat = e.target.value;
+  document.getElementById('crumb-current').textContent = state.cat === 'All' ? 'Shop' : state.cat;
+  render();
+});
+document.getElementById('price-range').addEventListener('input', e => {
+  state.maxPrice = Number(e.target.value);
+  document.getElementById('price-val').textContent = raftFormatPrice(state.maxPrice);
+  render();
+});
+document.getElementById('in-stock-only').addEventListener('change', e => {
+  state.inStockOnly = e.target.checked;
+  render();
+});
+document.getElementById('sort-select').addEventListener('change', e => {
+  state.sort = e.target.value;
+  render();
+});
+document.getElementById('clear-filters').addEventListener('click', () => {
+  state = { cat:'All', maxPrice:9000, inStockOnly:false, sort:'popular' };
+  document.querySelector('input[name="cat"][value="All"]').checked = true;
+  document.getElementById('price-range').value = 9000;
+  document.getElementById('price-val').textContent = 'R9 000';
+  document.getElementById('in-stock-only').checked = false;
+  document.getElementById('sort-select').value = 'popular';
+  document.getElementById('crumb-current').textContent = 'Shop';
+  render();
+});
+document.getElementById('price-range').value = 9000;
+
+function render(){
+  let items = RAFT_PRODUCTS.filter(p =>
+    (state.cat === 'All' || p.category === state.cat) &&
+    p.price <= state.maxPrice &&
+    (!state.inStockOnly || p.stock > 0)
+  );
+  if(state.sort === 'price-asc') items.sort((a,b)=>a.price-b.price);
+  else if(state.sort === 'price-desc') items.sort((a,b)=>b.price-a.price);
+  else if(state.sort === 'rating') items.sort((a,b)=>b.rating-a.rating);
+  else items.sort((a,b)=>b.reviews-a.reviews);
+
+  document.getElementById('result-count').textContent = `${items.length} product${items.length!==1?'s':''}`;
+  document.getElementById('shop-grid').style.display = items.length ? 'grid' : 'none';
+  document.getElementById('no-results').style.display = items.length ? 'none' : 'block';
+  document.getElementById('shop-grid').innerHTML = items.map(renderProductCard).join('');
+}
+function renderProductCard(p){
+  const low = p.stock > 0 && p.stock <= 5;
+  const out = p.stock === 0;
+  return `<article class="product-card">
+    <a href="product.html?id=${p.id}" class="thumb">
+      ${out ? '<span class="badge badge-low">Out of stock</span>' : (low ? '<span class="badge badge-low">Low stock</span>' : (p.compareAt ? '<span class="badge">Sale</span>' : ''))}
+      ${raftIcon(p.icon)}
+    </a>
+    <div class="info">
+      <span class="cat">${p.category}</span>
+      <h3><a href="product.html?id=${p.id}">${p.name}</a></h3>
+      <div class="price-row">
+        <span class="price">${p.compareAt ? `<del>${raftFormatPrice(p.compareAt)}</del>` : ''}${raftFormatPrice(p.price)}</span>
+      </div>
+      <span class="stock-note ${low?'low':''}">${out ? 'Notify me when back in stock' : (low ? `Only ${p.stock} left` : 'In stock')}</span>
+    </div>
+  </article>`;
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title id="page-title">Product — RAFT</title>
+<meta id="meta-desc" name="description" content="">
+<link id="canonical" rel="canonical" href="">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0F3B36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<script type="application/ld+json" id="product-schema"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="logo"><span>RAFT</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="shop.html?cat=Rafts">Rafts</a>
+      <a href="shop.html?cat=Kayaks">Kayaks</a>
+      <a href="dashboard.html">My Orders</a>
+    </nav>
+    <div class="header-actions">
+      <a href="dashboard.html" class="icon-link" aria-label="Account"></a>
+      <a href="cart.html" class="icon-link" aria-label="Cart"><span class="cart-count" data-cart-count>0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="padding-top:24px;">
+  <p class="breadcrumb" id="breadcrumb"></p>
+</div>
+
+<section class="section" style="padding-top:8px;">
+  <div class="container pdp" id="pdp-root"></div>
+</section>
+
+<section class="section section-alt" id="related-section">
+  <div class="container">
+    <div class="section-head"><h2>You may also need</h2></div>
+    <div class="product-grid" id="related-grid"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 RAFT Outdoor (Pty) Ltd. All rights reserved.</span>
+      <div class="payment-icons"><span>PayFast</span><span>Visa</span><span>Mastercard</span><span>EFT</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/nav.js"></script>
+<script>
+document.querySelectorAll('.logo').forEach(l => l.innerHTML = raftIcon('logo') + '<span>RAFT</span>');
+document.querySelector('.nav-toggle').innerHTML = raftIcon('menu');
+document.querySelector('[aria-label="Account"]').innerHTML = raftIcon('user');
+document.querySelector('[aria-label="Cart"]').innerHTML = raftIcon('cart') + document.querySelector('[aria-label="Cart"]').innerHTML;
+
+const id = new URLSearchParams(location.search).get('id') || RAFT_PRODUCTS[0].id;
+const p = raftFindProduct(id) || RAFT_PRODUCTS[0];
+
+// SEO: title, description, canonical, structured data — set per product for organic discovery
+document.getElementById('page-title').textContent = `${p.name} | ${p.category} — RAFT`;
+document.getElementById('meta-desc').setAttribute('content', `${p.short} ${raftFormatPrice(p.price)}. In stock, ships SA-wide with secure PayFast checkout.`);
+document.getElementById('canonical').setAttribute('href', `https://www.raftgear.co.za/product.html?id=${p.id}`);
+document.getElementById('product-schema').textContent = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": p.name,
+  "description": p.short,
+  "category": p.category,
+  "sku": p.id,
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": p.rating, "reviewCount": p.reviews },
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "ZAR",
+    "price": p.price,
+    "availability": p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    "url": `https://www.raftgear.co.za/product.html?id=${p.id}`
+  }
+});
+
+document.getElementById('breadcrumb').innerHTML =
+  `<a href="index.html">Home</a> / <a href="shop.html?cat=${encodeURIComponent(p.category)}">${p.category}</a> / <span>${p.name}</span>`;
+
+const low = p.stock > 0 && p.stock <= 5;
+const out = p.stock === 0;
+document.getElementById('pdp-root').innerHTML = `
+  <div class="pdp-gallery">
+    <div class="main-image">${raftIcon(p.icon)}</div>
+  </div>
+  <div class="pdp-info">
+    <span class="cat">${p.category}</span>
+    <h1>${p.name}</h1>
+    <div class="rating-row"><span class="stars">★★★★★</span> ${p.rating} (${p.reviews} reviews)</div>
+    <p class="price">${p.compareAt ? `<del>${raftFormatPrice(p.compareAt)}</del> ` : ''}${raftFormatPrice(p.price)}</p>
+    <p>${p.short}</p>
+    <p class="stock-note ${low?'low':''}" style="font-size:.85rem;">${out ? 'Currently out of stock' : (low ? `Only ${p.stock} left in stock` : `${p.stock} in stock — ships within 48 hours`)}</p>
+
+    <div class="qty-row">
+      <div class="qty-control">
+        <button type="button" id="qty-minus" aria-label="Decrease quantity">−</button>
+        <input type="number" id="qty-input" value="1" min="1" max="${Math.max(p.stock,1)}" ${out?'disabled':''}>
+        <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
+      </div>
+      <button class="btn btn-primary" id="add-btn" ${out?'disabled':''}>${out ? 'Out of stock' : 'Add to cart'}</button>
+    </div>
+    <a href="cart.html" class="btn btn-outline btn-block" style="margin-bottom:24px;">View cart</a>
+
+    <table class="spec-table">
+      ${Object.entries(p.specs).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}
+    </table>
+
+    <div class="payfast-note" style="margin-top:20px;">
+      ${raftIcon('lock')}
+      <span>Checkout is secured with PayFast — your card details never touch RAFT's servers.</span>
+    </div>
+  </div>
+`;
+
+document.getElementById('qty-minus').addEventListener('click', () => {
+  const inp = document.getElementById('qty-input');
+  inp.value = Math.max(1, Number(inp.value) - 1);
+});
+document.getElementById('qty-plus').addEventListener('click', () => {
+  const inp = document.getElementById('qty-input');
+  inp.value = Math.min(p.stock, Number(inp.value) + 1);
+});
+if(!out){
+  document.getElementById('add-btn').addEventListener('click', () => {
+    raftAddToCart(p.id, Number(document.getElementById('qty-input').value));
+  });
+}
+
+// Related products — same category, excluding current
+const related = RAFT_PRODUCTS.filter(x => x.category === p.category && x.id !== p.id).slice(0,4);
+document.getElementById('related-section').style.display = related.length ? 'block' : 'none';
+document.getElementById('related-grid').innerHTML = related.map(rp => {
+  const rlow = rp.stock > 0 && rp.stock <= 5, rout = rp.stock === 0;
+  return `<article class="product-card">
+    <a href="product.html?id=${rp.id}" class="thumb">
+      ${rout ? '<span class="badge badge-low">Out of stock</span>' : (rlow ? '<span class="badge badge-low">Low stock</span>' : '')}
+      ${raftIcon(rp.icon)}
+    </a>
+    <div class="info">
+      <span class="cat">${rp.category}</span>
+      <h3><a href="product.html?id=${rp.id}">${rp.name}</a></h3>
+      <div class="price-row"><span class="price">${raftFormatPrice(rp.price)}</span></div>
+    </div>
+  </article>`;
+}).join('');
+</script>
+</body>
+</html>
