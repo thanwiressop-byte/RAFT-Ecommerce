@@ -22,6 +22,7 @@ function pfUrlEncode(str){
 function generateSignature(fields, passphrase){
   let pairs = Object.entries(fields)
     .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${pfUrlEncode(String(v).trim())}`);
 
   let query = pairs.join("&");
