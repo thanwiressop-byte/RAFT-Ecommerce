@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const helmet = require("helmet");
+const helmet = require(helmet({ contentSecurityPolicy: false }));
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
